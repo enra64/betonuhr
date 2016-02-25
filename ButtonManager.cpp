@@ -20,13 +20,24 @@ void ButtonManager::toggled() {
 void ButtonManager::checkPressType() {
     if(millis() - mLastToggleTime < 10) return; //wait
     if(getButtonState() != mLastToggleState) return; //button bounced
-    _delay_ms(90);
+    if(mLastToggleState) return; //button not pressed
+    _delay_ms(140);
     if(getButtonState() == mLastToggleState){
-        delay(400);
+        delay(350);
         mDisplay->onLongButtonPress();
+        digitalWrite(LED, 1);
+        delay(50);
+        digitalWrite(LED, 0);
     }
     else{
         mDisplay->onShortButtonPress();
+        digitalWrite(LED, 1);
+        delay(50);
+        digitalWrite(LED, 0);
+        delay(200);
+        digitalWrite(LED, 1);
+        delay(50);
+        digitalWrite(LED, 0);
     }
 }
 

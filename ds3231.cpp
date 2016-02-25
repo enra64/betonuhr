@@ -17,49 +17,64 @@
 
 #include "ds3231.h"
 
-uint8_t DS3231::bcdToDec(uint8_t val){ return ((val / 16 * 10) + (val % 16)); }
-uint8_t DS3231::decToBcd(uint8_t val){ return( (val/10*16) + (val%10) ); }
+uint8_t DS3231::bcdToDec(int val) { return (uint8_t) ((val / 16 * 10) + (val % 16)); }
 
-void DS3231::init()
-{
-  Wire.begin();
+uint8_t DS3231::decToBcd(int val) { return (uint8_t) ((val / 10 * 16) + (val % 10)); }
+
+void DS3231::init() {
+    Wire.begin();
 }
 
-uint8_t DS3231::readTime(MyTime* tm)
-{
-  Wire.beginTransmission(DS3231_I2C_ADDRESS); // reset DS1307 register pointer 
-  Wire.write(0);
-  
-  if (Wire.endTransmission())                //rtc is stopped?
-    return ERR_RTC_STOPPED;
-    
-  if (Wire.requestFrom(DS3231_I2C_ADDRESS, 7))       // report any receive esrrors
-    return ERR_RTC_RECEIVE;
-    
-  if(Wire.available() <7)
-    return ERR_RTC_WONKY;
+uint8_t DS3231::readTime(MyTime *tm) {
+    Wire.beginTransmission(DS3231_I2C_ADDRESS); // reset DS1307 register pointer
+    Wire.write(0);
 
-  tm->second = bcdToDec(Wire.read() & 0x7F);
-  tm->minute = bcdToDec(Wire.read());
-  tm->hour = bcdToDec(Wire.read());
-  tm->dow = bcdToDec(Wire.read());
-  tm->day = bcdToDec(Wire.read());
-  tm->month = bcdToDec(Wire.read());
-  tm->year = bcdToDec(Wire.read()) + 2000;
-  return tm->isAllZero();//returns 4 if everything is zero, 0 otherwise
+    if (Wire.endTransmission())                //rtc is stopped?
+        return ERR_RTC_STOPPED;
+
+    if (Wire.requestFrom(DS3231_I2C_ADDRESS, 7))       // report any receive esrrors
+        return ERR_RTC_RECEIVE;
+
+    if (Wire.available() < 7)
+        return ERR_RTC_WONKY;
+
+    tm->second = bcdToDec(Wire.read() & 0x7F);
+    tm->minute = bcdToDec(Wire.read());
+    tm->hour = bcdToDec(Wire.read());
+    tm->dow = bcdToDec(Wire.read());
+    tm->day = bcdToDec(Wire.read());
+    tm->month = bcdToDec(Wire.read());
+    tm->year = bcdToDec(Wire.read()) + 2000;
+    return tm->isAllZero();//returns 4 if everything is zero, 0 otherwise
 }
 
-uint8_t DS3231::writeTime(MyTime* tm){
-  // sets time and date data to DS3231
-  Wire.beginTransmission(DS3231_I2C_ADDRESS);
-  Wire.write(0); // set next input to start at the seconds register
-  Wire.write(decToBcd(tm->second)); // set seconds
-  Wire.write(decToBcd(tm->minute)); // set minutes
-  Wire.write(decToBcd(tm->hour)); // set hours
-  Wire.write(decToBcd(tm->dow)); // set day of week (1=Sunday, 7=Saturday)
-  Wire.write(decToBcd(tm->day)); // set date (1 to 31)
-  Wire.write(decToBcd(tm->month)); // set month
-  Wire.write(decToBcd(tm->year)); // set year (0 to 99)
-  Wire.endTransmission();
-  return 0;
+uint8_t DS3231::writeTime(MyTime *tm) {
+    stopClock();
+    // sets time and date data to DS3231
+    Wire.beginTransmission(DS3231_I2C_ADDRESS);
+    Wire.write(0); // set next input to start at the seconds register
+    Wire.write(decToBcd(tm->second)); // set seconds
+    Wire.write(decToBcd(tm->minute)); // set minutes
+    Wire.write(decToBcd(tm->hour)); // set hours
+    Wire.write(decToBcd(tm->dow)); // set day of week (1=Sunday, 7=Saturday)
+    Wire.write(decToBcd(tm->day)); // set date (1 to 31)
+    Wire.write(decToBcd(tm->month)); // set month
+    Wire.write(decToBcd(tm->year)); // set year (0 to 99)
+    Wire.endTransmission();
+    startClock();
+    return 0;
+}
+
+void DS3231::stopClock() {
+    Wire.beginTransmission(DS3231_I2C_ADDRESS);
+    Wire.write(STATUS_ADDRESS);
+    Wire.write(0x80);
+    Wire.endTransmission();
+}
+
+void DS3231::startClock() {
+    Wire.beginTransmission(DS3231_I2C_ADDRESS);
+    Wire.write(STATUS_ADDRESS);
+    Wire.write(0x00);
+    Wire.endTransmission();
 }

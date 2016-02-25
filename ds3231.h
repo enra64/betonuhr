@@ -26,6 +26,12 @@
 
 #define DS3231_I2C_ADDRESS 0x68
 
+#define CLOCK_ADDRESS 0x00
+#define ALARM1_ADDRESS 0x07
+#define ALARM2_ADDRESS 0x0B
+#define STATUS_ADDRESS 0x0F
+#define CONTROL_ADDRESS 0x0E
+
 //error codes
 #define ERR_NO_ERR 0
 #define ERR_RTC_STOPPED 1
@@ -36,12 +42,16 @@
 class DS3231
 {
 private:
-  uint8_t bcdToDec(uint8_t val);
-  uint8_t decToBcd(uint8_t val);
+  uint8_t bcdToDec(int val);
+  uint8_t decToBcd(int val);
 public:
   uint8_t readTime(MyTime* tm);
   uint8_t writeTime(MyTime* tm);
   void init();
+
+    void stopClock();
+
+    void startClock();
 };
 
 #endif // DS3231_H

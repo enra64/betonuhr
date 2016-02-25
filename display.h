@@ -38,7 +38,9 @@
 #define SEG_6 PD2
 #define SEG_7 PD1
 
-enum State {normal, set_hours, set_minutes};
+enum State {
+    normal, set_hours, set_minutes
+};
 
 // A   0
 //B G 1 6
@@ -70,10 +72,10 @@ const uint8_t SEGMENT_PINS[] = {SEG_1, SEG_2, SEG_3, SEG_4, SEG_5, SEG_6, SEG_7}
 
 class Display {
 private:
-    uint8_t mLastDisplayed = 0;
-    uint8_t mData[4];
     State mCurrentButtonState = normal;
 
+    uint8_t mLastDisplayed = 0;
+    uint8_t mData[4];
     uint8_t mSetHours = 8;
     uint8_t mSetMinutes = 8;
 
@@ -84,6 +86,7 @@ private:
     void writePin(volatile uint8_t *port, int pin, bool val);
 
     void initInterrupt();
+
 public:
 
     void init();

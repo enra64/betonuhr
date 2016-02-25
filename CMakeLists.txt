@@ -10,7 +10,7 @@ set(CMAKE_C_COMPILER   avr-gcc)
 set(CMAKE_CXX_COMPILER avr-g++)
 
 set(SOURCE_FILES
-    "clion source.ino"
+    "clion_source.ino"
     display.cpp
     display.h
     ds3231.cpp

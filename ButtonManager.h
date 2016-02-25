@@ -10,6 +10,7 @@
 #include <avr/io.h>
 #include "display.h"
 
+#define LED A2
 
 class ButtonManager {
 public:
