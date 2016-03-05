@@ -50,3 +50,11 @@ MyTime::MyTime() {
 MyTime::MyTime(uint8_t m, uint8_t h) {
     setTime(m, h);
 }
+
+void MyTime::setMinutes(uint8_t m) {
+    minute = m;
+}
+
+void MyTime::setHours(uint8_t h) {
+    hour = h;
+}

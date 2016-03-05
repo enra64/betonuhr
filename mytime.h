@@ -36,6 +36,10 @@ public:
     uint8_t second, minute = 01, hour = 23, dow, day, month, year;
 
     void setTime(uint8_t m, uint8_t h);
+
+    void setHours(uint8_t h);
+
+    void setMinutes(uint8_t m);
 };
 
 #endif // MYTIME_H

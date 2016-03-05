@@ -52,11 +52,27 @@ void Display::writeSegmentData(uint8_t data) {
     PORTD = data | (1 << 7);
 }
 
-void Display::processTime(MyTime *tm) {
-    mData[0] = NUMBERS[tm->hour / 10];
-    mData[1] = NUMBERS[tm->hour % 10];
-    mData[2] = NUMBERS[tm->minute / 10];
-    mData[3] = NUMBERS[tm->minute % 10];
+void Display::processTime() {
+    unsigned long secondsSinceStart = millis() / 1000;
+    unsigned long minutesSinceStart = secondsSinceStart / 60;
+    unsigned long currentHoursOffset = minutesSinceStart / 60;
+    unsigned long currentMinutesOffset = minutesSinceStart - currentHoursOffset * 60;
+
+    mNormalTime->setTime(04 + currentMinutesOffset, 13 + currentHoursOffset);
+    //MyTime *tm = mCurrentButtonState == normal ? mNormalTime : mChangeTime;
+    if(mCurrentButtonState == STATE_NORMAL){
+        mData[0] = NUMBERS[mNormalTime->hour / 10];
+        mData[1] = NUMBERS[mNormalTime->hour % 10];
+        mData[2] = NUMBERS[mNormalTime->minute / 10];
+        mData[3] = NUMBERS[mNormalTime->minute % 10];
+    }
+    else{
+        mData[0] = NUMBERS[mCurrentButtonState];//mChangeTime->hour / 10];
+        mData[1] = NUMBERS[mChangeTime->hour % 10];
+        mData[2] = NUMBERS[mChangeTime->minute / 10];
+        mData[3] = NUMBERS[mChangeTime->minute % 10];
+        //mCurrentButtonState = 9;
+    }
 }
 
 void Display::byteWriteTest(uint8_t data) {
@@ -90,25 +106,49 @@ void Display::initInterrupt() {
 }
 
 void Display::onShortButtonPress() {
-    if(mCurrentButtonState == set_hours){
-
+    switch(mCurrentButtonState){
+        case STATE_CHANGE_HOURS:
+            mChangeTime->setHours((mChangeTime->hour + 1) % 24);
+            //blink(true);
+            break;
+        case STATE_CHANGE_MINUTES:
+            mChangeTime->setMinutes((mChangeTime->minute + 1) % 60);
+            break;
+        case STATE_NORMAL:
+        default:
+            break;
     }
 }
 
 void Display::onLongButtonPress() {
-    switch(mCurrentButtonState){
-        case normal:
-            mCurrentButtonState = set_hours;
-            mSetHours = 8;
-            break;
-        case set_hours:
-            mCurrentButtonState = set_minutes;
-            mSetMinutes = 0;
-            break;
-        case set_minutes:
-            mCurrentButtonState = normal;
-            DS3231 writeTime;
-            writeTime.writeTime(new MyTime(mSetMinutes, mSetHours));
-            break;
+    if(mCurrentButtonState == 7){
+        mCurrentButtonState = 0;
+        //blink(false);
     }
+    if (mCurrentButtonState == 3){
+        mCurrentButtonState = 7;
+        //blink(false);
+    }
+    if(mCurrentButtonState == 0) {
+        mCurrentButtonState = 3;
+        //mChangeTime = new MyTime(0, 8);
+    }
+}
+
+void Display::blink(bool shortPress) {
+    if(shortPress){
+        digitalWrite(LED, HIGH);
+        delay(10);
+        digitalWrite(LED, LOW);
+    }
+    else{
+        digitalWrite(LED, HIGH);
+        delay(100);
+        digitalWrite(LED, LOW);
+    }
+}
+
+Display::Display() {
+    mCurrentButtonState = STATE_NORMAL;
+    //mChangeTime = new MyTime(0, 8);
 }

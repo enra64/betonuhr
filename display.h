@@ -22,6 +22,7 @@
 
 #include "avr/io.h"
 #include "mytime.h"
+#include "Arduino.h"
 
 //SIG_SEG in eagle, but these are digits
 #define DIG_1 PB2
@@ -38,9 +39,7 @@
 #define SEG_6 PD2
 #define SEG_7 PD1
 
-enum State {
-    normal, set_hours, set_minutes
-};
+#define LED A2
 
 // A   0
 //B G 1 6
@@ -70,24 +69,36 @@ const uint8_t CHARACTERS[] = {
 const uint8_t DIGIT_PINS[] = {DIG_1, DIG_2, DIG_3, DIG_4};
 const uint8_t SEGMENT_PINS[] = {SEG_1, SEG_2, SEG_3, SEG_4, SEG_5, SEG_6, SEG_7};
 
+#define STATE_CHANGE_MINUTES 2
+#define STATE_CHANGE_HOURS 4
+#define STATE_NORMAL 8
+
 class Display {
 private:
-    State mCurrentButtonState = normal;
+
 
     uint8_t mLastDisplayed = 0;
+
     uint8_t mData[4];
-    uint8_t mSetHours = 8;
-    uint8_t mSetMinutes = 8;
+
+    MyTime *mChangeTime = new MyTime(34, 12);
+
+    MyTime *mNormalTime = new MyTime(34, 12);
 
     void writeSegmentData(uint8_t data);
 
     void switchDigit(uint8_t which, bool state);
+
+    void blink(bool shortPress);
 
     void writePin(volatile uint8_t *port, int pin, bool val);
 
     void initInterrupt();
 
 public:
+    volatile uint8_t mCurrentButtonState = 5;
+
+    Display();
 
     void init();
 
@@ -101,7 +112,7 @@ public:
 
     void disableDigit();
 
-    void processTime(MyTime *tm);
+    void processTime();
 
     void showError(uint8_t errCode);
 };

@@ -10,17 +10,15 @@
 #include <avr/io.h>
 #include "display.h"
 
-#define LED A2
+
 
 class ButtonManager {
 public:
-    void toggled();
     void checkPressType();
     ButtonManager();
 private:
-    bool mLastToggleState = false;
-    unsigned long mLastToggleTime;
     bool getButtonState();
+    bool mButtonIsHeldDown = false;
     Display *mDisplay;
 };
 
