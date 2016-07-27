@@ -6,7 +6,7 @@
 #define CLION_SOURCE_BUTTONMANAGER_H
 
 #define BUTTON_INPUT PCINT11
-#define __AVR_ATmega328P__
+//#define __AVR_ATmega328P__
 #include <avr/io.h>
 #include "display.h"
 

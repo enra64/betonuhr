@@ -27,16 +27,17 @@ void DS3231::init() {
 
 uint8_t DS3231::readTime(MyTime *tm) {
     Wire.beginTransmission(DS3231_I2C_ADDRESS); // reset DS1307 register pointer
-    Wire.write(0);
+    Wire.write(CLOCK_ADDRESS);
 
     if (Wire.endTransmission())                //rtc is stopped?
         return ERR_RTC_STOPPED;
+    Wire.requestFrom(DS3231_I2C_ADDRESS, 7);
+    while(!Wire.available());
+    //if (Wire.requestFrom(DS3231_I2C_ADDRESS, 7))       // report any receive esrrors
+    //    return ERR_RTC_RECEIVE;
 
-    if (Wire.requestFrom(DS3231_I2C_ADDRESS, 7))       // report any receive esrrors
-        return ERR_RTC_RECEIVE;
-
-    if (Wire.available() < 7)
-        return ERR_RTC_WONKY;
+    //if (Wire.available() < 7)
+    //    return ERR_RTC_WONKY;
 
     tm->second = bcdToDec(Wire.read() & 0x7F);
     tm->minute = bcdToDec(Wire.read());

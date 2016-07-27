@@ -32,13 +32,10 @@ void Display::disableDigit() {
 }
 
 void Display::switchDigit(uint8_t pin, bool state) {
-    switch (pin) {
-        case DIG_3:
-            writePin(&PORTD, pin, state);
-            break;
-        default:
-            writePin(&PORTB, pin, state);
-    }
+    if(pin == DIG_3)
+        writePin(&PORTD, pin, state);
+    else
+        writePin(&PORTB, pin, state);
 }
 
 void Display::writePin(volatile uint8_t *port, int pin, bool val) {
@@ -53,21 +50,20 @@ void Display::writeSegmentData(uint8_t data) {
 }
 
 void Display::processTime() {
-    unsigned long secondsSinceStart = millis() / 1000;
-    unsigned long minutesSinceStart = secondsSinceStart / 60;
-    unsigned long currentHoursOffset = minutesSinceStart / 60;
-    unsigned long currentMinutesOffset = minutesSinceStart - currentHoursOffset * 60;
+    // readout time from rtc
+    uint8_t err = rtc.readTime(mNormalTime);
 
-    mNormalTime->setTime(04 + currentMinutesOffset, 13 + currentHoursOffset);
-    //MyTime *tm = mCurrentButtonState == normal ? mNormalTime : mChangeTime;
-    if(mCurrentButtonState == STATE_NORMAL){
+    if(err != ERR_NO_ERR){
+        showError(err);
+    }
+    else if(mCurrentButtonState == STATE_NORMAL){
         mData[0] = NUMBERS[mNormalTime->hour / 10];
         mData[1] = NUMBERS[mNormalTime->hour % 10];
         mData[2] = NUMBERS[mNormalTime->minute / 10];
         mData[3] = NUMBERS[mNormalTime->minute % 10];
     }
     else{
-        mData[0] = NUMBERS[mCurrentButtonState];//mChangeTime->hour / 10];
+        mData[0] = NUMBERS[mChangeTime->hour / 10];
         mData[1] = NUMBERS[mChangeTime->hour % 10];
         mData[2] = NUMBERS[mChangeTime->minute / 10];
         mData[3] = NUMBERS[mChangeTime->minute % 10];
@@ -85,14 +81,6 @@ void Display::showError(uint8_t errCode) {
     mData[1] = CHARACTERS[1];
     mData[2] = CHARACTERS[1];
     mData[3] = NUMBERS[errCode];
-}
-
-void Display::init() {
-    //we need all output pins on port d
-    DDRD = 0xFF;
-    //port b is ICSP and 3 digits
-    DDRB |= (1 << DIG_4) | (1 << DIG_2) | (1 << DIG_1);
-    initInterrupt();
 }
 
 //target is: normal mode, ON on overflow, OFF on compare match
@@ -146,6 +134,19 @@ void Display::blink(bool shortPress) {
         delay(100);
         digitalWrite(LED, LOW);
     }
+}
+
+void Display::init() {
+    //we need all output pins on port d
+    DDRD = 0xFF;
+    //port b is ICSP (programming interface) and 3 digits
+    DDRB |= (1 << DIG_4) | (1 << DIG_2) | (1 << DIG_1);
+    initInterrupt();
+
+    // enable the rtc
+    rtc.init();
+    //rtc.writeTime(mNormalTime);
+    //rtc.startClock();
 }
 
 Display::Display() {

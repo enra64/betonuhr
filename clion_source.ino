@@ -1,4 +1,5 @@
-#define __AVR_ATmega328P__
+// use this when not coding with arduino
+//#define __AVR_ATmega328P__
 
 #include <Wire.h>
 #include "display.h"

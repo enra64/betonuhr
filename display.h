@@ -18,10 +18,11 @@
 #ifndef DISPLAY_H
 #define DISPLAY_H
 
-#define __AVR_ATmega328P__
+//#define __AVR_ATmega328P__
 
 #include "avr/io.h"
 #include "mytime.h"
+#include "ds3231.h"
 #include "Arduino.h"
 
 //SIG_SEG in eagle, but these are digits
@@ -76,14 +77,15 @@ const uint8_t SEGMENT_PINS[] = {SEG_1, SEG_2, SEG_3, SEG_4, SEG_5, SEG_6, SEG_7}
 class Display {
 private:
 
+    DS3231 rtc;
 
     uint8_t mLastDisplayed = 0;
 
     uint8_t mData[4];
 
-    MyTime *mChangeTime = new MyTime(34, 12);
+    MyTime *mChangeTime = new MyTime(31, 13);
 
-    MyTime *mNormalTime = new MyTime(34, 12);
+    MyTime *mNormalTime = new MyTime(31, 13);
 
     void writeSegmentData(uint8_t data);
 

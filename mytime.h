@@ -18,7 +18,7 @@
 #ifndef MYTIME_H
 #define MYTIME_H
 
-#define __AVR_ATmega328P__
+//#define __AVR_ATmega328P__
 
 #include <Arduino.h>
 
