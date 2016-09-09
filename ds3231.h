@@ -18,7 +18,7 @@
 #ifndef DS3231_H
 #define DS3231_H
 
-#define __AVR_ATmega328P__
+//#define __AVR_ATmega328P__
 
 #include <Wire.h>
 #include "mytime.h"
